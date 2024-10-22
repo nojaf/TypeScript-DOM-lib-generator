@@ -1,7 +1,7 @@
 import * as Browser from "./build/types.js";
 import { promises as fs } from "fs";
 import { merge, resolveExposure, arrayToMap } from "./build/helpers.js";
-import { emitWebIdl } from "./build/emitter.js";
+import { emitRescriptBindings, emitWebIdl } from "./build/emitter.js";
 import { convert } from "./build/widlprocess.js";
 import { getExposedTypes } from "./build/expose.js";
 import {
@@ -49,41 +49,47 @@ async function emitFlavor(
   mergeNamesakes(exposed);
   exposed.events = webidl.events;
 
-  const result = emitWebIdl(
-    exposed,
-    options.global[0],
-    "",
-    options.useIteratorObject,
-  );
+  const rescript = emitRescriptBindings(exposed);
   await fs.writeFile(
-    new URL(`${options.name}.generated.d.ts`, options.outputFolder),
-    result,
+    new URL(`${options.name}.res`, options.outputFolder),
+    rescript,
   );
 
-  const iterators = emitWebIdl(
-    exposed,
-    options.global[0],
-    "sync",
-    options.useIteratorObject,
-  );
-  await fs.writeFile(
-    new URL(`${options.name}.iterable.generated.d.ts`, options.outputFolder),
-    iterators,
-  );
+  // const result = emitWebIdl(
+  //   exposed,
+  //   options.global[0],
+  //   "",
+  //   options.useIteratorObject,
+  // );
+  // await fs.writeFile(
+  //   new URL(`${options.name}.generated.d.ts`, options.outputFolder),
+  //   result,
+  // );
 
-  const asyncIterators = emitWebIdl(
-    exposed,
-    options.global[0],
-    "async",
-    options.useIteratorObject,
-  );
-  await fs.writeFile(
-    new URL(
-      `${options.name}.asynciterable.generated.d.ts`,
-      options.outputFolder,
-    ),
-    asyncIterators,
-  );
+  // const iterators = emitWebIdl(
+  //   exposed,
+  //   options.global[0],
+  //   "sync",
+  //   options.useIteratorObject,
+  // );
+  // await fs.writeFile(
+  //   new URL(`${options.name}.iterable.generated.d.ts`, options.outputFolder),
+  //   iterators,
+  // );
+
+  // const asyncIterators = emitWebIdl(
+  //   exposed,
+  //   options.global[0],
+  //   "async",
+  //   options.useIteratorObject,
+  // );
+  // await fs.writeFile(
+  //   new URL(
+  //     `${options.name}.asynciterable.generated.d.ts`,
+  //     options.outputFolder,
+  //   ),
+  //   asyncIterators,
+  // );
 }
 
 async function emitDom() {
