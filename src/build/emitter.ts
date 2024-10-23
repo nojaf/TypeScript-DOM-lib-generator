@@ -1829,11 +1829,13 @@ function toCamelCase(name: string) {
   return name[0].toLowerCase() + name.slice(1);
 }
 
-const reservedRescriptWords = ["type"];
+const reservedRescriptWords = ["type", "open", "as", "constraint", "external", "module"];
 
 function getFieldName(fieldName: string): string {
   if (reservedRescriptWords.includes(fieldName)) {
     return `@as("${fieldName}") ${fieldName}_`;
+  } else if (fieldName[0] !== fieldName[0].toLowerCase()) {
+    return `@as("${fieldName}") ${fieldName[0].toLowerCase()}${fieldName.slice(1)}`;
   }
 
   return fieldName;
@@ -1976,17 +1978,46 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
     return c1.name < c2.name ? -1 : c1.name > c2.name ? 1 : 0;
   }
 
+  function printComment({
+    mdnUrl,
+    comment,
+    name,
+  }: {
+    mdnUrl?: string;
+    comment?: string;
+    name?: string;
+  }) {
+    let linkText = name ? `See ${name} on MDN` : "Read more on MDN";
+    if (comment || mdnUrl) {
+      printer.printLine(`/**`);
+      if (comment) printer.printLine(comment);
+      if (mdnUrl) printer.printLine(`[${linkText}](${mdnUrl})`);
+      printer.printLine(`*/`);
+    }
+  }
+
   function emitInterfaceRecord(i: Browser.Interface) {
-    printer.printLine(`type ${toCamelCase(i.name)} = {`);
+    const typename = toCamelCase(i.name);
+    printComment({name: i.name, mdnUrl: i.mdnUrl, comment: i.comment});
+    printer.printLine(`type ${typename}${reservedRescriptWords.includes(typename) ? "_" : ""} = {`);
     printer.increaseIndent();
     if (i.properties?.property) {
       for (const key of Object.keys(i.properties.property)) {
-        printer.printLine(`${getFieldName(key)}: string,`);
+        let property = i.properties.property[key];
+        printComment({
+          mdnUrl: property.mdnUrl,
+          comment: property.comment,
+        });
+        printer.printLine(`${getFieldName(key)}: unknown,`);
       }
     }
 
     if (i.extends) {
-      printer.printLine(`...${toCamelCase(i.extends)},`);
+      // TODO: Handle this properly. The interface extends has type params.
+      if (!i.extends.includes("<")) {
+        // Type params..
+        printer.printLine(`...${toCamelCase(i.extends)},`);
+      }
     }
 
     printer.decreaseIndent();
