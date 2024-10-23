@@ -1,6 +1,6 @@
 // do rescript stuff here
 type event = {
-    type: string,
+    @as("type") type_: string,
     target: string,
     srcElement: string,
     currentTarget: string,

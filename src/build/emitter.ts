@@ -1829,6 +1829,16 @@ function toCamelCase(name: string) {
   return name[0].toLowerCase() + name.slice(1);
 }
 
+const reservedRescriptWords = ["type"];
+
+function getFieldName(fieldName: string): string {
+  if (reservedRescriptWords.includes(fieldName)) {
+    return `@as("${fieldName}") ${fieldName}_`;
+  }
+
+  return fieldName;
+}
+
 export function emitRescriptBindings(webidl: Browser.WebIdl): string {
   // Global print target
   const printer = createTextWriter("\n");
@@ -1971,7 +1981,7 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
     printer.increaseIndent();
     if (i.properties?.property) {
       for (const key of Object.keys(i.properties.property)) {
-        printer.printLine(`${key}: string,`);
+        printer.printLine(`${getFieldName(key)}: string,`);
       }
     }
 
