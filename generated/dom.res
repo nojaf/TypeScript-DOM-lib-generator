@@ -1113,16 +1113,16 @@ type event = {
     Returns the object to which event is dispatched (its target).
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/target)
     */
-  target: unknown,
+  target: Null.t<unknown>,
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/srcElement)
     */
-  srcElement: unknown,
+  srcElement: Null.t<unknown>,
   /**
     Returns the object whose event listener's callback is currently being invoked.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     */
-  currentTarget: unknown,
+  currentTarget: Null.t<unknown>,
   /**
     Returns the event's phase, which is one of NONE, CAPTURING_PHASE, AT_TARGET, and BUBBLING_PHASE.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
@@ -1175,7 +1175,7 @@ type uIEvent = {
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/UIEvent/view)
     */
-  view: unknown,
+  view: Null.t<unknown>,
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/UIEvent/detail)
     */
@@ -1242,7 +1242,7 @@ type mouseEvent = {
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/relatedTarget)
     */
-  relatedTarget: unknown,
+  relatedTarget: Null.t<unknown>,
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/pageX)
     */

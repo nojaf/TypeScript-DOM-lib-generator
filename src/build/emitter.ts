@@ -2032,7 +2032,13 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
           mdnUrl: property.mdnUrl,
           comment: property.comment,
         });
-        printer.printLine(`${getFieldName(key)}: unknown,`);
+        let propertyValue = "unknown"; // TODO: implement actual values
+        printer.print(`${getFieldName(key)}`);
+        if (property.optional) printer.print(`?`);
+        printer.print(`: `);
+        if (property.nullable) printer.print(`Null.t<${propertyValue}>`);
+        else printer.print(propertyValue);
+        printer.printLine(`,`);
       }
     }
 
