@@ -1864,6 +1864,46 @@ function getVariantName(variantRawName: string): string {
   return variantRawName;
 }
 
+interface Dictionary {
+  name: string;
+  extends?: string;
+}
+
+type DictionaryMap<T extends Dictionary> = { [name: string]: T };
+
+function topologicalSortDictionaries<T extends Dictionary>(dictionaries: T[]): T[] {
+  const sorted: T[] = [];
+  const visited: Set<string> = new Set();
+  const tempMarked: Set<string> = new Set();
+  const dictMap: DictionaryMap<T> = Object.fromEntries(
+    dictionaries.map((d) => [d.name, d])
+  );
+
+  function visit(dictName: string) {
+    if (visited.has(dictName)) return;
+    if (tempMarked.has(dictName)) {
+      throw new Error(`Cyclic dependency detected with ${dictName}`);
+    }
+
+    tempMarked.add(dictName);
+    const dict = dictMap[dictName];
+    if (dict?.extends) {
+      visit(dict.extends);
+    }
+    tempMarked.delete(dictName);
+    visited.add(dictName);
+    sorted.push(dict);
+  }
+
+  dictionaries.forEach((dict) => {
+    if (!visited.has(dict.name)) {
+      visit(dict.name);
+    }
+  });
+
+  return sorted;
+}
+
 export function emitRescriptBindings(webidl: Browser.WebIdl): string {
   // Global print target
   const printer = createTextWriter("\n");
@@ -1886,7 +1926,7 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
 
   function interfaceInheritanceCount(
     currentCount: number,
-    i: Browser.Interface,
+    i: {extends?: string},
   ): number {
     if (i.extends && allInterfacesMap.hasOwnProperty(i.extends)) {
       return interfaceInheritanceCount(
@@ -1897,30 +1937,6 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
 
     return currentCount;
   }
-
-  const interfaceSubset = new Set(["Event", "UIEvent", "MouseEvent"]);
-  const emitSubsetOfInterfacesForTesting = true;
-  const relevantInterfaces = allInterfaces
-    .filter((i) => emitSubsetOfInterfacesForTesting ? interfaceSubset.has(i.name) : true)
-    .sort((a, b) => {
-      if (a.extends && !b.extends) {
-        return 1;
-      }
-
-      if (!a.extends && b.extends) {
-        return -1;
-      }
-
-      // Sort by inheritance count, the more interfaces it extends, the lower in the list.
-      if (a.extends && b.extends) {
-        const aCount = interfaceInheritanceCount(0, a);
-        const bCount = interfaceInheritanceCount(0, b);
-
-        return aCount - bCount;
-      }
-
-      return a.name.localeCompare(b.name);
-    });
 
   // const allLegacyWindowAliases = allInterfaces.flatMap(
   //   (i) => i.legacyWindowAlias,
@@ -2020,13 +2036,76 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
     }
   }
 
-  function emitInterfaceRecord(i: Browser.Interface) {
+  // Track field names so we can avoid reprinting fields we've already covered by a spread
+  const typeFieldNames = new Map<string, Set<string>>();
+
+  // TODO: This and emitInterfaceRecord should share most of the logic at some point
+  function emitDictionaryRecord(i: Browser.Dictionary) {
+    const fieldNamesFromExtended = i.extends
+      ? Array.from(typeFieldNames.get(i.extends.split("<")[0])?.values() ?? [])
+      : [];
     const typename = toCamelCase(i.name);
-    printComment({name: i.name, mdnUrl: i.mdnUrl, comment: i.comment});
     printer.printLine(`type ${typename}${reservedRescriptWords.includes(typename) ? "_" : ""} = {`);
     printer.increaseIndent();
+
+    if (i.extends) {
+      // TODO: Handle this properly. The interface extends has type params.
+      if (!i.extends.includes("<")) {
+        // Type params..
+        printer.printLine(`...${toCamelCase(i.extends)},`);
+      } else {
+        console.warn("TODO: Type params in extends: " + i.extends);
+      }
+    }
+
+    if (i.members.member) {
+      for (const key of Object.keys(i.members.member)) {
+        if (fieldNamesFromExtended.includes(key)) continue;
+        let property = i.members.member[key];
+        printComment({ comment: property.comment });
+        let propertyValue = "unknown"; // TODO: implement actual values
+        printer.print(`${getFieldName(key)}`);
+        printer.print(`: `);
+        if (property.nullable) printer.print(`Null.t<${propertyValue}>`);
+        else printer.print(propertyValue);
+        printer.printLine(`,`);
+      }
+    }
+
+    const fieldNames = new Set([
+      ...Object.keys(i.members.member ?? []),
+      ...fieldNamesFromExtended,
+    ]);
+    typeFieldNames.set(i.name, fieldNames);
+
+    printer.decreaseIndent();
+    printer.printLine("}");
+  }
+
+  function emitInterfaceRecord(i: Browser.Interface) {
+    const fieldNamesFromExtended = i.extends
+      ? Array.from(typeFieldNames.get(i.extends.split("<")[0])?.values() ?? [])
+      : [];
+    const typename = toCamelCase(i.name);
+    printComment({ name: i.name, mdnUrl: i.mdnUrl, comment: i.comment });
+    printer.printLine(
+      `type ${typename}${reservedRescriptWords.includes(typename) ? "_" : ""} = {`
+    );
+    printer.increaseIndent();
+
+    if (i.extends) {
+      // TODO: Handle this properly. The interface extends has type params.
+      if (!i.extends.includes("<")) {
+        // Type params..
+        printer.printLine(`...${toCamelCase(i.extends)},`);
+      } else {
+        console.warn("TODO: Type params in extends: " + i.extends);
+      }
+    }
+
     if (i.properties?.property) {
       for (const key of Object.keys(i.properties.property)) {
+        if (fieldNamesFromExtended.includes(key)) continue;
         let property = i.properties.property[key];
         printComment({
           mdnUrl: property.mdnUrl,
@@ -2042,13 +2121,11 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
       }
     }
 
-    if (i.extends) {
-      // TODO: Handle this properly. The interface extends has type params.
-      if (!i.extends.includes("<")) {
-        // Type params..
-        printer.printLine(`...${toCamelCase(i.extends)},`);
-      }
-    }
+    const fieldNames = new Set([
+      ...Object.keys(i.properties?.property ?? []),
+      ...fieldNamesFromExtended,
+    ]);
+    typeFieldNames.set(i.name, fieldNames);
 
     printer.decreaseIndent();
     printer.printLine("}");
@@ -2070,11 +2147,27 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
       .forEach(emitEnum);
   }
 
+  function emitDictionaries() {
+    const dicts = getElements(webidl.dictionaries, "dictionary")
+      .sort(compareName)
+      .filter((i) => !i.legacyNamespace);
+
+    const sortedDicts = topologicalSortDictionaries(dicts);
+
+    sortedDicts.forEach(emitDictionaryRecord);
+  }
+
   function emit() {
     printer.reset();
+    printer.printLine("/** Temporary. */");
+    printer.printLine("type error = {}");
+    printer.printLine("");
+    emitDictionaries();
     emitEnums();
 
-    for(const i of relevantInterfaces) {
+    const sortedInterfaces = topologicalSortDictionaries(allInterfaces).filter(Boolean);
+
+    for(const i of sortedInterfaces) {
       emitInterfaceRecord(i);
 
       // TODO: construct a %identity function to convert to the base interface?
