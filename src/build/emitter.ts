@@ -1830,6 +1830,7 @@ function toCamelCase(name: string) {
 }
 
 const reservedRescriptWords = ["type", "open", "as", "constraint", "external", "module"];
+const validVariantConstructorNameRegexp = /[^a-zA-Z0-9_]/g;
 
 function getFieldName(fieldName: string): string {
   if (reservedRescriptWords.includes(fieldName)) {
@@ -1839,6 +1840,28 @@ function getFieldName(fieldName: string): string {
   }
 
   return fieldName;
+}
+
+function getVariantName(variantRawName: string): string {
+  let legalName = `${variantRawName[0].toUpperCase()}${variantRawName.slice(1)}`;
+  let firstChar = legalName[0];
+
+  if (!isNaN(parseFloat(firstChar))) {
+    legalName = `V${legalName}`;
+  }
+
+  legalName = legalName
+    .split("-")
+    .map((s) => s[0].toUpperCase() + s.slice(1))
+    .join("");
+
+  legalName = legalName.replace(validVariantConstructorNameRegexp, "");
+
+  if (variantRawName !== legalName) {
+    return `@as("${variantRawName}") ${legalName}`;
+  }
+
+  return variantRawName;
 }
 
 export function emitRescriptBindings(webidl: Browser.WebIdl): string {
@@ -2025,9 +2048,25 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
     printer.printLine("}");
   }
 
+  function emitEnum(e: Browser.Enum) {
+    const values = e.value.slice().sort();
+    printer.printLine(`type ${toCamelCase(e.name)} =`);
+    values.forEach((v) => {
+      if (v !== "") printer.printLine(`  | ${getVariantName(v)}`);
+    });
+    printer.printLine("");
+  }
+
+  function emitEnums() {
+    getElements(webidl.enums, "enum")
+      .sort(compareName)
+      .filter((i) => !i.legacyNamespace)
+      .forEach(emitEnum);
+  }
+
   function emit() {
     printer.reset();
-    printer.printLine("// do rescript stuff here");
+    emitEnums();
 
     for(const i of relevantInterfaces) {
       emitInterfaceRecord(i);
