@@ -1825,9 +1825,11 @@ export function emitWebIdl(
   }
 }
 
-export function emitRescriptBindings(
-  webidl: Browser.WebIdl,
-): string {
+function toCamelCase(name: string) {
+  return name[0].toLowerCase() + name.slice(1);
+}
+
+export function emitRescriptBindings(webidl: Browser.WebIdl): string {
   // Global print target
   const printer = createTextWriter("\n");
 
@@ -1839,12 +1841,51 @@ export function emitRescriptBindings(
   //   webidl.interfaces,
   //   "interface",
   // ).concat(getElements(webidl.mixins, "mixin"));
+
   const allInterfaces = getElements(webidl.interfaces, "interface").concat(
     getElements(webidl.callbackInterfaces, "interface"),
     getElements(webidl.mixins, "mixin"),
   );
 
   const allInterfacesMap = toNameMap(allInterfaces);
+
+  function interfaceInheritanceCount(
+    currentCount: number,
+    i: Browser.Interface,
+  ): number {
+    if (i.extends && allInterfacesMap.hasOwnProperty(i.extends)) {
+      return interfaceInheritanceCount(
+        currentCount + 1,
+        allInterfacesMap[i.extends],
+      );
+    }
+
+    return currentCount;
+  }
+
+  const interfaceSubset = new Set(["Event", "UIEvent", "MouseEvent"]);
+  const relevantInterfaces = allInterfaces
+    .filter((i) => interfaceSubset.has(i.name))
+    .sort((a, b) => {
+      if (a.extends && !b.extends) {
+        return 1;
+      }
+
+      if (!a.extends && b.extends) {
+        return -1;
+      }
+
+      // Sort by inheritance count, the more interfaces it extends, the lower in the list.
+      if (a.extends && b.extends) {
+        const aCount = interfaceInheritanceCount(0, a);
+        const bCount = interfaceInheritanceCount(0, b);
+
+        return aCount - bCount;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+
   // const allLegacyWindowAliases = allInterfaces.flatMap(
   //   (i) => i.legacyWindowAlias,
   // );
@@ -1926,13 +1967,18 @@ export function emitRescriptBindings(
   }
 
   function emitInterfaceRecord(i: Browser.Interface) {
-    printer.printLine(`type ${i.name} = {`);
+    printer.printLine(`type ${toCamelCase(i.name)} = {`);
     printer.increaseIndent();
     if (i.properties?.property) {
       for (const key of Object.keys(i.properties.property)) {
         printer.printLine(`${key}: string,`);
       }
     }
+
+    if (i.extends) {
+      printer.printLine(`...${toCamelCase(i.extends)},`);
+    }
+
     printer.decreaseIndent();
     printer.printLine("}");
   }
@@ -1941,7 +1987,12 @@ export function emitRescriptBindings(
     printer.reset();
     printer.printLine("// do rescript stuff here");
 
-    allInterfaces.sort(compareName).forEach(emitInterfaceRecord);
+    for(const i of relevantInterfaces) {
+      emitInterfaceRecord(i);
+
+      // TODO: construct a %identity function to convert to the base interface?
+      // Or perhaps this happens in a separate file/module?
+    }
 
     return printer.getResult();
   }
