@@ -12,7 +12,7 @@
     "worklet"
   ],
   "scripts": {
-    "build": "tsc && node ./lib/build.js && rescript",
+    "build": "tsc && node ./lib/build.js && rescript format -all && rescript",
     "baseline-accept": "cpx \"generated\\**\" baselines\\",
     "lint": "eslint --max-warnings 0 src deploy/*.js && tsc -p deploy/jsconfig.json",
     "lint-fix": "eslint --max-warnings 0 src deploy/*.js --fix",

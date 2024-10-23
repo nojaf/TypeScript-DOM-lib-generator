@@ -85,8 +85,7 @@ type autoFillContactKind =
   | @as("mobile") Mobile
   | @as("work") Work
 
-type autoFillCredentialField =
-  | @as("webauthn") Webauthn
+type autoFillCredentialField = | @as("webauthn") Webauthn
 
 type autoFillNormalField =
   | @as("additional-name") AdditionalName
@@ -126,8 +125,7 @@ type autoFillNormalField =
   | @as("transaction-currency") TransactionCurrency
   | @as("username") Username
 
-type autoKeyword =
-  | @as("auto") Auto
+type autoKeyword = | @as("auto") Auto
 
 type automationRate =
   | @as("a-rate") ARate
@@ -679,8 +677,7 @@ type presentationStyle =
   | @as("inline") Inline
   | @as("unspecified") Unspecified
 
-type publicKeyCredentialType =
-  | @as("public-key") PublicKey
+type publicKeyCredentialType = | @as("public-key") PublicKey
 
 type pushEncryptionKeyName =
   | @as("auth") Auth
@@ -788,8 +785,7 @@ type rTCPriorityType =
   | @as("medium") Medium
   | @as("very-low") VeryLow
 
-type rTCRtcpMuxPolicy =
-  | @as("require") Require
+type rTCRtcpMuxPolicy = | @as("require") Require
 
 type rTCRtpTransceiverDirection =
   | @as("inactive") Inactive
@@ -841,11 +837,9 @@ type rTCStatsType =
   | @as("remote-outbound-rtp") RemoteOutboundRtp
   | @as("transport") Transport
 
-type readableStreamReaderMode =
-  | @as("byob") Byob
+type readableStreamReaderMode = | @as("byob") Byob
 
-type readableStreamType =
-  | @as("bytes") Bytes
+type readableStreamType = | @as("bytes") Bytes
 
 type readyState =
   | @as("closed") Closed
@@ -961,8 +955,7 @@ type scrollRestoration =
   | @as("auto") Auto
   | @as("manual") Manual
 
-type scrollSetting =
-  | @as("up") Up
+type scrollSetting = | @as("up") Up
 
 type securityPolicyViolationEventDisposition =
   | @as("enforce") Enforce
@@ -1073,8 +1066,7 @@ type videoTransferCharacteristics =
   | @as("iec61966-2-1") Iec6196621
   | @as("smpte170m") Smpte170m
 
-type wakeLockType =
-  | @as("screen") Screen
+type wakeLockType = | @as("screen") Screen
 
 type webGLPowerPreference =
   | @as("default") Default
@@ -1111,176 +1103,177 @@ An event which takes place in the DOM.
 [See Event on MDN](https://developer.mozilla.org/docs/Web/API/Event)
 */
 type event = {
-    /**
+  /**
     Returns the type of event, e.g. "click", "hashchange", or "submit".
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/type)
     */
-    @as("type") type_: unknown,
-    /**
+  @as("type")
+  type_: unknown,
+  /**
     Returns the object to which event is dispatched (its target).
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/target)
     */
-    target: unknown,
-    /**
+  target: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/srcElement)
     */
-    srcElement: unknown,
-    /**
+  srcElement: unknown,
+  /**
     Returns the object whose event listener's callback is currently being invoked.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     */
-    currentTarget: unknown,
-    /**
+  currentTarget: unknown,
+  /**
     Returns the event's phase, which is one of NONE, CAPTURING_PHASE, AT_TARGET, and BUBBLING_PHASE.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     */
-    eventPhase: unknown,
-    /**
+  eventPhase: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)
     */
-    cancelBubble: unknown,
-    /**
+  cancelBubble: unknown,
+  /**
     Returns true or false depending on how event was initialized. True if event goes through its target's ancestors in reverse tree order, and false otherwise.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
     */
-    bubbles: unknown,
-    /**
+  bubbles: unknown,
+  /**
     Returns true or false depending on how event was initialized. Its return value does not always carry meaning, but true can indicate that part of the operation during which event was dispatched, can be canceled by invoking the preventDefault() method.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
     */
-    cancelable: unknown,
-    /**
+  cancelable: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/returnValue)
     */
-    returnValue: unknown,
-    /**
+  returnValue: unknown,
+  /**
     Returns true if preventDefault() was invoked successfully to indicate cancelation, and false otherwise.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
     */
-    defaultPrevented: unknown,
-    /**
+  defaultPrevented: unknown,
+  /**
     Returns true or false depending on how event was initialized. True if event invokes listeners past a ShadowRoot node that is the root of its target, and false otherwise.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/composed)
     */
-    composed: unknown,
-    /**
+  composed: unknown,
+  /**
     Returns true if event was dispatched by the user agent, and false otherwise.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     */
-    isTrusted: unknown,
-    /**
+  isTrusted: unknown,
+  /**
     Returns the event's timestamp as the number of milliseconds measured relative to the time origin.
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
     */
-    timeStamp: unknown,
+  timeStamp: unknown,
 }
 /**
 Simple user interface events.
 [See UIEvent on MDN](https://developer.mozilla.org/docs/Web/API/UIEvent)
 */
 type uIEvent = {
-    /**
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/UIEvent/view)
     */
-    view: unknown,
-    /**
+  view: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/UIEvent/detail)
     */
-    detail: unknown,
-    /**
+  detail: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/UIEvent/which)
     */
-    which: unknown,
-    ...event,
+  which: unknown,
+  ...event,
 }
 /**
 Events that occur due to the user interacting with a pointing device (such as a mouse). Common events using this interface include click, dblclick, mouseup, mousedown.
 [See MouseEvent on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent)
 */
 type mouseEvent = {
-    /**
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/screenX)
     */
-    screenX: unknown,
-    /**
+  screenX: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/screenY)
     */
-    screenY: unknown,
-    /**
+  screenY: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/clientX)
     */
-    clientX: unknown,
-    /**
+  clientX: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/clientY)
     */
-    clientY: unknown,
-    /**
+  clientY: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/layerX)
     */
-    layerX: unknown,
-    /**
+  layerX: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/layerY)
     */
-    layerY: unknown,
-    /**
+  layerY: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/ctrlKey)
     */
-    ctrlKey: unknown,
-    /**
+  ctrlKey: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/shiftKey)
     */
-    shiftKey: unknown,
-    /**
+  shiftKey: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/altKey)
     */
-    altKey: unknown,
-    /**
+  altKey: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/metaKey)
     */
-    metaKey: unknown,
-    /**
+  metaKey: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/button)
     */
-    button: unknown,
-    /**
+  button: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/buttons)
     */
-    buttons: unknown,
-    /**
+  buttons: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/relatedTarget)
     */
-    relatedTarget: unknown,
-    /**
+  relatedTarget: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/pageX)
     */
-    pageX: unknown,
-    /**
+  pageX: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/pageY)
     */
-    pageY: unknown,
-    /**
+  pageY: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/x)
     */
-    x: unknown,
-    /**
+  x: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/y)
     */
-    y: unknown,
-    /**
+  y: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/offsetX)
     */
-    offsetX: unknown,
-    /**
+  offsetX: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/offsetY)
     */
-    offsetY: unknown,
-    /**
+  offsetY: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/movementX)
     */
-    movementX: unknown,
-    /**
+  movementX: unknown,
+  /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/MouseEvent/movementY)
     */
-    movementY: unknown,
-    ...uIEvent,
+  movementY: unknown,
+  ...uIEvent,
 }
