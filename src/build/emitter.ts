@@ -1876,8 +1876,9 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
   }
 
   const interfaceSubset = new Set(["Event", "UIEvent", "MouseEvent"]);
+  const emitSubsetOfInterfacesForTesting = true;
   const relevantInterfaces = allInterfaces
-    .filter((i) => interfaceSubset.has(i.name))
+    .filter((i) => emitSubsetOfInterfacesForTesting ? interfaceSubset.has(i.name) : true)
     .sort((a, b) => {
       if (a.extends && !b.extends) {
         return 1;
