@@ -1864,6 +1864,18 @@ function getVariantName(variantRawName: string): string {
   return variantRawName;
 }
 
+// Extend clauses can look like `Sometype<SomeOtherType>`. We need to extract `SomeOtherType` from the string.
+function parseExtendsClause(extendsClause: string): string[] {
+  // Match base type and any type parameters
+  const match = extendsClause.match(/^([a-zA-Z0-9_]+)(<([a-zA-Z0-9_<>]+)>)?/);
+  if (match) {
+    const baseType = match[1];
+    const typeParams = match[3] ? match[3].split(/,\s*/) : [];
+    return [baseType, ...typeParams];
+  }
+  return [extendsClause];
+}
+
 interface Dictionary {
   name: string;
   extends?: string;
@@ -1888,7 +1900,12 @@ function topologicalSortDictionaries<T extends Dictionary>(dictionaries: T[]): T
     tempMarked.add(dictName);
     const dict = dictMap[dictName];
     if (dict?.extends) {
-      visit(dict.extends);
+      const dependencies = parseExtendsClause(dict.extends);
+      dependencies.forEach((dep) => {
+        if (dictMap[dep]) {
+          visit(dep);
+        }
+      });
     }
     tempMarked.delete(dictName);
     visited.add(dictName);
@@ -1921,22 +1938,6 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
     getElements(webidl.callbackInterfaces, "interface"),
     getElements(webidl.mixins, "mixin"),
   );
-
-  const allInterfacesMap = toNameMap(allInterfaces);
-
-  function interfaceInheritanceCount(
-    currentCount: number,
-    i: {extends?: string},
-  ): number {
-    if (i.extends && allInterfacesMap.hasOwnProperty(i.extends)) {
-      return interfaceInheritanceCount(
-        currentCount + 1,
-        allInterfacesMap[i.extends],
-      );
-    }
-
-    return currentCount;
-  }
 
   // const allLegacyWindowAliases = allInterfaces.flatMap(
   //   (i) => i.legacyWindowAlias,
@@ -2036,26 +2037,61 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
     }
   }
 
+  // Track all items we've seen so we can look up things from them
+  const seenItems = new Map<string, Browser.Interface | Browser.Dictionary>();
+
+  function transformExtends(extds: string) {
+    const hasTypeParams = extds.includes("<");
+    const entry = seenItems.get(extds);
+
+    // Insert default type parameters
+    if (entry?.typeParameters && !hasTypeParams) {
+      return (
+        toCamelCase(extds) +
+        "<" +
+        entry.typeParameters.map((t) => `${t.default ?? toCamelCase(t.name)}`).join(", ") +
+        ">"
+      );
+    }
+    return extds
+      .split("<")
+      .map(toCamelCase)
+      .join("<");
+  }
+
+  function printTypeParams(typeParameters: Browser.TypeParameter[] | undefined) {
+    let hasTypeParams = false
+    typeParameters?.forEach(t => {
+      if (!hasTypeParams) {
+        hasTypeParams = true;
+        printer.print("<");
+      } else {
+        printer.print(", ");
+      }
+      printer.print(`'${toCamelCase(t.name)}`);
+    })
+    if (hasTypeParams) {
+      printer.print(">");
+    }
+  }
+
   // Track field names so we can avoid reprinting fields we've already covered by a spread
   const typeFieldNames = new Map<string, Set<string>>();
 
   // TODO: This and emitInterfaceRecord should share most of the logic at some point
   function emitDictionaryRecord(i: Browser.Dictionary) {
+    seenItems.set(i.name, i);
     const fieldNamesFromExtended = i.extends
       ? Array.from(typeFieldNames.get(i.extends.split("<")[0])?.values() ?? [])
       : [];
     const typename = toCamelCase(i.name);
-    printer.printLine(`type ${typename}${reservedRescriptWords.includes(typename) ? "_" : ""} = {`);
+    printer.print(`type ${typename}${reservedRescriptWords.includes(typename) ? "_" : ""}`);
+    printTypeParams(i.typeParameters);
+    printer.printLine(` = {`);
     printer.increaseIndent();
 
     if (i.extends) {
-      // TODO: Handle this properly. The interface extends has type params.
-      if (!i.extends.includes("<")) {
-        // Type params..
-        printer.printLine(`...${toCamelCase(i.extends)},`);
-      } else {
-        console.warn("TODO: Type params in extends: " + i.extends);
-      }
+      printer.printLine(`...${transformExtends(i.extends)},`);
     }
 
     if (i.members.member) {
@@ -2083,24 +2119,21 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
   }
 
   function emitInterfaceRecord(i: Browser.Interface) {
+    seenItems.set(i.name, i);
     const fieldNamesFromExtended = i.extends
       ? Array.from(typeFieldNames.get(i.extends.split("<")[0])?.values() ?? [])
       : [];
     const typename = toCamelCase(i.name);
     printComment({ name: i.name, mdnUrl: i.mdnUrl, comment: i.comment });
-    printer.printLine(
-      `type ${typename}${reservedRescriptWords.includes(typename) ? "_" : ""} = {`
+    printer.print(
+      `type ${typename}${reservedRescriptWords.includes(typename) ? "_" : ""}`
     );
+    printTypeParams(i.typeParameters);
+    printer.printLine(` = {`);
     printer.increaseIndent();
 
     if (i.extends) {
-      // TODO: Handle this properly. The interface extends has type params.
-      if (!i.extends.includes("<")) {
-        // Type params..
-        printer.printLine(`...${toCamelCase(i.extends)},`);
-      } else {
-        console.warn("TODO: Type params in extends: " + i.extends);
-      }
+      printer.printLine(`...${transformExtends(i.extends)},`);
     }
 
     if (i.properties?.property) {
@@ -2159,9 +2192,13 @@ export function emitRescriptBindings(webidl: Browser.WebIdl): string {
 
   function emit() {
     printer.reset();
-    printer.printLine("/** Temporary. */");
+    printer.printLine("/** Temporary, to be fixed */");
     printer.printLine("type error = {}");
+    printer.printLine("type any");
+    printer.printLine("type arrayBufferView = {}");
+    printer.printLine("/* End temporary */");
     printer.printLine("");
+
     emitDictionaries();
     emitEnums();
 

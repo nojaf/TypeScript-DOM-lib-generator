@@ -1,5 +1,8 @@
-/** Temporary. */
+/** Temporary, to be fixed */
 type error = {}
+type any
+type arrayBufferView = {}
+/* End temporary */
 
 type eventListenerOptions = {capture: unknown}
 type addEventListenerOptions = {
@@ -358,7 +361,7 @@ type cryptoKeyPair = {
   publicKey: unknown,
   privateKey: unknown,
 }
-type customEventInit = {
+type customEventInit<'t> = {
   ...eventInit,
   detail: unknown,
 }
@@ -906,7 +909,7 @@ type mediaTrackSupportedConstraints = {
   backgroundBlur: unknown,
   displaySurface: unknown,
 }
-type messageEventInit = {
+type messageEventInit<'t> = {
   ...eventInit,
   data: unknown,
   origin: unknown,
@@ -1249,7 +1252,7 @@ type pushSubscriptionOptionsInit = {
   userVisibleOnly: unknown,
   applicationServerKey: Null.t<unknown>,
 }
-type queuingStrategy = {
+type queuingStrategy<'t> = {
   highWaterMark: unknown,
   size: unknown,
 }
@@ -1571,15 +1574,15 @@ By default, calling the async iterator's return() method will also cancel the st
     */
   preventCancel: unknown,
 }
-type readableStreamReadDoneResult = {
+type readableStreamReadDoneResult<'t> = {
   done: unknown,
   value: unknown,
 }
-type readableStreamReadValueResult = {
+type readableStreamReadValueResult<'t> = {
   done: unknown,
   value: unknown,
 }
-type readableWritablePair = {
+type readableWritablePair<'r, 'w> = {
   readable: unknown,
   /**
     Provides a convenient, chainable way of piping this readable stream through a transform stream (or any other { writable, readable } pair). It simply pipes the stream into the writable side of the supplied pair, and returns the readable side for further use.
@@ -1840,7 +1843,7 @@ type trackEventInit = {
   ...eventInit,
   track: Null.t<unknown>,
 }
-type transformer = {
+type transformer<'i, 'o> = {
   start: unknown,
   transform: unknown,
   flush: unknown,
@@ -1860,20 +1863,20 @@ type underlyingByteSource = {
   pull: unknown,
   cancel: unknown,
 }
-type underlyingDefaultSource = {
+type underlyingDefaultSource<'r> = {
   @as("type") type_: unknown,
   start: unknown,
   pull: unknown,
   cancel: unknown,
 }
-type underlyingSink = {
+type underlyingSink<'w> = {
   start: unknown,
   write: unknown,
   close: unknown,
   abort: unknown,
   @as("type") type_: unknown,
 }
-type underlyingSource = {
+type underlyingSource<'r> = {
   start: unknown,
   pull: unknown,
   cancel: unknown,
@@ -3434,7 +3437,7 @@ type fileReader = {
 The request object does not initially contain any information about the result of the operation, but once information becomes available, an event is fired on the request, and the information becomes available through the properties of the IDBRequest instance.
 [See IDBRequest on MDN](https://developer.mozilla.org/docs/Web/API/IDBRequest)
 */
-type iDBRequest = {
+type iDBRequest<'t> = {
   ...eventTarget,
   /**
     When a request is completed, returns the result, or undefined if the request failed. Throws a "InvalidStateError" DOMException if the request is still pending.
@@ -3471,40 +3474,6 @@ type iDBRequest = {
   onerror: unknown,
 }
 /**
-Also inherits methods from its parents IDBRequest and EventTarget.
-[See IDBOpenDBRequest on MDN](https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest)
-*/
-type iDBOpenDBRequest = {
-  /**
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest/blocked_event)
-    */
-  onblocked: unknown,
-  /**
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest/upgradeneeded_event)
-    */
-  onupgradeneeded: unknown,
-}
-/**
-This IndexedDB API interface indicates that the version of the database has changed, as the result of an IDBOpenDBRequest.onupgradeneeded event handler function.
-[See IDBVersionChangeEvent on MDN](https://developer.mozilla.org/docs/Web/API/IDBVersionChangeEvent)
-*/
-type iDBVersionChangeEvent = {
-  ...event,
-  /**
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/IDBVersionChangeEvent/oldVersion)
-    */
-  oldVersion: unknown,
-  /**
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/IDBVersionChangeEvent/newVersion)
-    */
-  newVersion: Null.t<unknown>,
-}
-/**
-In the following code snippet, we make a request to open a database, and include handlers for the success and error cases. For a full working example, see our To-do Notifications app (view example live.)
-[See IDBFactory on MDN](https://developer.mozilla.org/docs/Web/API/IDBFactory)
-*/
-type iDBFactory = {}
-/**
 This IndexedDB API interface provides a connection to a database; you can use an IDBDatabase object to open a transaction on your database then create, manipulate, and delete objects (data) in that database. The interface provides the only way to get and manage versions of the database.
 [See IDBDatabase on MDN](https://developer.mozilla.org/docs/Web/API/IDBDatabase)
 */
@@ -3536,6 +3505,41 @@ type iDBDatabase = {
     */
   onversionchange: unknown,
 }
+/**
+Also inherits methods from its parents IDBRequest and EventTarget.
+[See IDBOpenDBRequest on MDN](https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest)
+*/
+type iDBOpenDBRequest = {
+  ...iDBRequest<iDBDatabase>,
+  /**
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest/blocked_event)
+    */
+  onblocked: unknown,
+  /**
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest/upgradeneeded_event)
+    */
+  onupgradeneeded: unknown,
+}
+/**
+This IndexedDB API interface indicates that the version of the database has changed, as the result of an IDBOpenDBRequest.onupgradeneeded event handler function.
+[See IDBVersionChangeEvent on MDN](https://developer.mozilla.org/docs/Web/API/IDBVersionChangeEvent)
+*/
+type iDBVersionChangeEvent = {
+  ...event,
+  /**
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/IDBVersionChangeEvent/oldVersion)
+    */
+  oldVersion: unknown,
+  /**
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/IDBVersionChangeEvent/newVersion)
+    */
+  newVersion: Null.t<unknown>,
+}
+/**
+In the following code snippet, we make a request to open a database, and include handlers for the success and error cases. For a full working example, see our To-do Notifications app (view example live.)
+[See IDBFactory on MDN](https://developer.mozilla.org/docs/Web/API/IDBFactory)
+*/
+type iDBFactory = {}
 /**
 This example shows a variety of different uses of object stores, from updating the data structure with IDBObjectStore.createIndex inside an onupgradeneeded function, to adding a new item to our object store with IDBObjectStore.add. For a full working example, see our To-do Notifications app (view example live.)
 [See IDBObjectStore on MDN](https://developer.mozilla.org/docs/Web/API/IDBObjectStore)
@@ -7892,7 +7896,7 @@ type cSSStyleDeclaration = {
 /**
 [See CustomEvent on MDN](https://developer.mozilla.org/docs/Web/API/CustomEvent)
 */
-type customEvent = {
+type customEvent<'t> = {
   ...event,
   /**
     Returns any custom data event was created with. Typically used for synthetic events.
@@ -9236,7 +9240,7 @@ type fileSystemDirectoryHandle = {
 This Streams API interface provides a standard abstraction for writing streaming data to a destination, known as a sink. This object comes with built-in backpressure and queuing.
 [See WritableStream on MDN](https://developer.mozilla.org/docs/Web/API/WritableStream)
 */
-type writableStream = {
+type writableStream<'w> = {
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/WritableStream/locked)
     */
@@ -9246,7 +9250,7 @@ type writableStream = {
 [See FileSystemWritableFileStream on MDN](https://developer.mozilla.org/docs/Web/API/FileSystemWritableFileStream)
 */
 type fileSystemWritableFileStream = {
-  ...writableStream,
+  ...writableStream<any>,
 }
 /**
 This Gamepad API interface defines an individual gamepad or other controller, allowing access to information such as button presses, axis positions, and id.
@@ -9619,38 +9623,8 @@ type radioNodeList = {
     */
   value: unknown,
 }
-/**
-HTMLOptionsCollection is an interface representing a collection of HTML option elements (in document order) and offers methods and properties for traversing the list as well as optionally altering its items. This type is returned solely by the "options" property of select.
-[See HTMLOptionsCollection on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionsCollection)
-*/
-type hTMLOptionsCollection = {
-  /**
-    Returns the number of elements in the collection.
-
-When set to a smaller number, truncates the number of option elements in the corresponding container.
-
-When set to a greater number, adds new blank option elements to that container.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionsCollection/length)
-    */
-  length: unknown,
-  /**
-    Returns the index of the first selected item, if any, or −1 if there is no selected item.
-
-Can be set, to change the selection.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionsCollection/selectedIndex)
-    */
-  selectedIndex: unknown,
-}
-/**
-A type returned by some APIs which contains a list of DOMString (strings).
-[See DOMStringList on MDN](https://developer.mozilla.org/docs/Web/API/DOMStringList)
-*/
-type dOMStringList = {
-  /**
-    Returns the number of strings in strings.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/DOMStringList/length)
-    */
-  length: unknown,
+type hTMLCollectionOf<'t> = {
+  ...hTMLCollection,
 }
 /**
 Any HTML element. Some elements directly implement this interface, while others implement it via an interface that inherits it.
@@ -9735,6 +9709,77 @@ type hTMLElement = {
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLElement/offsetHeight)
     */
   offsetHeight: unknown,
+}
+/**
+<option> elements and inherits all classes and methods of the HTMLElement interface.
+[See HTMLOptionElement on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement)
+*/
+type hTMLOptionElement = {
+  ...hTMLElement,
+  /**
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/disabled)
+    */
+  disabled: unknown,
+  /**
+    Retrieves a reference to the form that the object is embedded in.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/form)
+    */
+  form: Null.t<unknown>,
+  /**
+    Sets or retrieves a value that you can use to implement your own label functionality for the object.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/label)
+    */
+  label: unknown,
+  /**
+    Sets or retrieves the status of an option.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/defaultSelected)
+    */
+  defaultSelected: unknown,
+  /**
+    Sets or retrieves whether the option in the list box is the default item.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/selected)
+    */
+  selected: unknown,
+  /**
+    Sets or retrieves the value which is returned to the server when the form control is submitted.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/value)
+    */
+  value: unknown,
+  /**
+    Sets or retrieves the text string specified by the option tag.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/text)
+    */
+  text: unknown,
+  /**
+    Sets or retrieves the ordinal position of an option in a list box.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/index)
+    */
+  index: unknown,
+}
+/**
+HTMLOptionsCollection is an interface representing a collection of HTML option elements (in document order) and offers methods and properties for traversing the list as well as optionally altering its items. This type is returned solely by the "options" property of select.
+[See HTMLOptionsCollection on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionsCollection)
+*/
+type hTMLOptionsCollection = {
+  ...hTMLCollectionOf<hTMLOptionElement>,
+  /**
+    Returns the index of the first selected item, if any, or −1 if there is no selected item.
+
+Can be set, to change the selection.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionsCollection/selectedIndex)
+    */
+  selectedIndex: unknown,
+}
+/**
+A type returned by some APIs which contains a list of DOMString (strings).
+[See DOMStringList on MDN](https://developer.mozilla.org/docs/Web/API/DOMStringList)
+*/
+type dOMStringList = {
+  /**
+    Returns the number of strings in strings.
+    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/DOMStringList/length)
+    */
+  length: unknown,
 }
 /**
 An invalid HTML element and derives from the HTMLElement interface, but without implementing any additional properties or methods.
@@ -11798,52 +11843,6 @@ type hTMLOptGroupElement = {
   label: unknown,
 }
 /**
-<option> elements and inherits all classes and methods of the HTMLElement interface.
-[See HTMLOptionElement on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement)
-*/
-type hTMLOptionElement = {
-  ...hTMLElement,
-  /**
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/disabled)
-    */
-  disabled: unknown,
-  /**
-    Retrieves a reference to the form that the object is embedded in.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/form)
-    */
-  form: Null.t<unknown>,
-  /**
-    Sets or retrieves a value that you can use to implement your own label functionality for the object.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/label)
-    */
-  label: unknown,
-  /**
-    Sets or retrieves the status of an option.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/defaultSelected)
-    */
-  defaultSelected: unknown,
-  /**
-    Sets or retrieves whether the option in the list box is the default item.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/selected)
-    */
-  selected: unknown,
-  /**
-    Sets or retrieves the value which is returned to the server when the form control is submitted.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/value)
-    */
-  value: unknown,
-  /**
-    Sets or retrieves the text string specified by the option tag.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/text)
-    */
-  text: unknown,
-  /**
-    Sets or retrieves the ordinal position of an option in a list box.
-    [Read more on MDN](https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/index)
-    */
-  index: unknown,
-}
-/**
 Provides special properties and methods for manipulating the layout and presentation of <textarea> elements.
 [See HTMLTextAreaElement on MDN](https://developer.mozilla.org/docs/Web/API/HTMLTextAreaElement)
 */
@@ -13311,7 +13310,7 @@ type imageBitmap = {
 A message received by a target object.
 [See MessageEvent on MDN](https://developer.mozilla.org/docs/Web/API/MessageEvent)
 */
-type messageEvent = {
+type messageEvent<'t> = {
   ...event,
   /**
     Returns the data of the message.
@@ -15210,7 +15209,7 @@ type storageManager = {}
 This Streams API interface represents a readable stream of byte data. The Fetch API offers a concrete instance of a ReadableStream through the body property of a Response object.
 [See ReadableStream on MDN](https://developer.mozilla.org/docs/Web/API/ReadableStream)
 */
-type readableStream = {
+type readableStream<'r> = {
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/ReadableStream/locked)
     */
@@ -15219,7 +15218,7 @@ type readableStream = {
 /**
 [See ReadableStreamDefaultReader on MDN](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader)
 */
-type readableStreamDefaultReader = {}
+type readableStreamDefaultReader<'r> = {}
 /**
 [See ReadableStreamBYOBReader on MDN](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader)
 */
@@ -15227,7 +15226,7 @@ type readableStreamBYOBReader = {}
 /**
 [See ReadableStreamDefaultController on MDN](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController)
 */
-type readableStreamDefaultController = {
+type readableStreamDefaultController<'r> = {
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/desiredSize)
     */
@@ -15259,7 +15258,7 @@ type readableStreamBYOBRequest = {
 This Streams API interface is the object returned by WritableStream.getWriter() and once created locks the < writer to the WritableStream ensuring that no other streams can write to the underlying sink.
 [See WritableStreamDefaultWriter on MDN](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter)
 */
-type writableStreamDefaultWriter = {
+type writableStreamDefaultWriter<'w> = {
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/closed)
     */
@@ -15286,7 +15285,7 @@ type writableStreamDefaultController = {
 /**
 [See TransformStream on MDN](https://developer.mozilla.org/docs/Web/API/TransformStream)
 */
-type transformStream = {
+type transformStream<'i, 'o> = {
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
     */
@@ -15299,7 +15298,7 @@ type transformStream = {
 /**
 [See TransformStreamDefaultController on MDN](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController)
 */
-type transformStreamDefaultController = {
+type transformStreamDefaultController<'o> = {
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/desiredSize)
     */
@@ -15309,13 +15308,15 @@ type transformStreamDefaultController = {
 This Streams API interface provides a built-in byte length queuing strategy that can be used when constructing streams.
 [See ByteLengthQueuingStrategy on MDN](https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy)
 */
-type byteLengthQueuingStrategy = {}
+type byteLengthQueuingStrategy = {
+  ...queuingStrategy<arrayBufferView>,
+}
 /**
 This Streams API interface provides a built-in byte length queuing strategy that can be used when constructing streams.
 [See CountQueuingStrategy on MDN](https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy)
 */
 type countQueuingStrategy = {
-  ...queuingStrategy,
+  ...queuingStrategy<any>,
 }
 /**
 [See SVGAnimationElement on MDN](https://developer.mozilla.org/docs/Web/API/SVGAnimationElement)
@@ -15703,7 +15704,7 @@ type table = {
 /**
 [See Global on MDN](https://developer.mozilla.org/docs/WebAssembly/JavaScript_interface/Global)
 */
-type global = {value: unknown}
+type global<'t> = {value: unknown}
 /**
 [See AnimationPlaybackEvent on MDN](https://developer.mozilla.org/docs/Web/API/AnimationPlaybackEvent)
 */
@@ -17755,7 +17756,7 @@ type formData = {}
 Events measuring progress of an underlying process, like an HTTP request (for an XMLHttpRequest, or the loading of the underlying resource of an <img>, <audio>, <video>, <style> or <link>).
 [See ProgressEvent on MDN](https://developer.mozilla.org/docs/Web/API/ProgressEvent)
 */
-type progressEvent = {
+type progressEvent<'t> = {
   ...event,
   /**
     [Read more on MDN](https://developer.mozilla.org/docs/Web/API/ProgressEvent/lengthComputable)
@@ -17783,11 +17784,8 @@ type hTMLTableHeaderCellElement = {
 type hTMLDocument = {
   ...document,
 }
-type nodeListOf = {
+type nodeListOf<'tNode> = {
   ...nodeList,
-}
-type hTMLCollectionOf = {
-  ...hTMLCollection,
 }
 type clientRect = {
   ...dOMRect,
