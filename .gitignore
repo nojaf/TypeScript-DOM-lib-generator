@@ -288,3 +288,4 @@ TypeScript
 deploy/generated
 
 !generated/dom.res
+!generated/dom.js
